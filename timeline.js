@@ -144,6 +144,7 @@
   };
 
   const listAppend = async function(page) {
+    // TODO 본 라인에 로딩바 노출, 더보기 숨김 추가 (혹은 별도 함수로 분리)
     const timelineList = await fetchApiData(url, page);
     const listList = divide(timelineList, 3);
     listList.forEach(list => {
@@ -172,6 +173,8 @@
         );
       });
     });
+    // TODO 본 라인에 로딩바 숨김, 더보기 노출 추가 (혹은 별도 함수로 분리)
+    // TODO p가 totalPage에 닿으면, 더보기 노출하지 않도록 해주세요 + 이벤트리스너 제거
   };
 
   listAppend(p++);
@@ -191,3 +194,4 @@
   more.addEventListener("click", clickMore);
   // more.removeEventListener('click', clickMore);
 })();
+// COMMENT 이전커밋(페이징만 붙인 것) 확인 후 고도화 진행해보면 좋을 것 같습니다
