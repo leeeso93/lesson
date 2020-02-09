@@ -128,9 +128,9 @@
   let more = article.children[2].firstElementChild;
   let p = 1;
   // 1페이지 호출 후 p가 2로 늘어남 (1만큼) - 증가연산은 값 평가 이후 수행됨
-//   let timelineList = await fetchApiData(url, p++);
+  //   let timelineList = await fetchApiData(url, p++);
 
-//   console.log(timelineList); // 12개의 리스트를 불러옴
+  //   console.log(timelineList); // 12개의 리스트를 불러옴
   const divide = function(list, size) {
     const copy = list.slice();
     const cnt = Math.floor(copy.length / size); // 12/3 = 4
@@ -144,7 +144,10 @@
   };
 
   const listAppend = async function(page) {
-    // TODO 본 라인에 로딩바 노출, 더보기 숨김 추가 (혹은 별도 함수로 분리)
+    // 본 라인에 로딩바 노출, 더보기 숨김 추가
+    loading.parentElement.style.display = "";
+    more.parentElement.style.display = "none";
+
     const timelineList = await fetchApiData(url, page);
     const listList = divide(timelineList, 3);
     listList.forEach(list => {
@@ -173,25 +176,27 @@
         );
       });
     });
-    // TODO 본 라인에 로딩바 숨김, 더보기 노출 추가 (혹은 별도 함수로 분리)
-    // TODO p가 totalPage에 닿으면, 더보기 노출하지 않도록 해주세요 + 이벤트리스너 제거
+    //  본 라인에 로딩바 숨김, 더보기 노출 추가
+    loading.parentElement.style.display = "none";
+    more.parentElement.style.display = "";
+
+    // p가 totalPage에 닿으면, 더보기 노출하지 않도록 해주세요 + 이벤트리스너 제거
+    if (p > totalPage) {
+      more.parentElement.style.display = "none";
+      more.removeEventListener("click", clickMore);
+    }
   };
 
   listAppend(p++);
 
   // 필요한 시점에 로딩바(의 부모 래퍼div), 더보기버튼(의 부모 래퍼div) display: none; 제거
   more.parentElement.style.display = "";
-  // more.parentElement.style.display = 'none';
-  //   loading.parentElement.style.display = "";
   loading.parentElement.style.display = "none";
   console.log(">> p: ", p);
   console.log(">> totalPage: ", totalPage);
   const clickMore = async function(e) {
-    // 여기서 p = 2가 되서 페이지가 바뀌어야 하는데 그걸 모르겠어요ㅠ
     listAppend(p++);
   };
   // 필요한 시점에 추가한 이벤트리스너 제거
   more.addEventListener("click", clickMore);
-  // more.removeEventListener('click', clickMore);
 })();
-// COMMENT 이전커밋(페이징만 붙인 것) 확인 후 고도화 진행해보면 좋을 것 같습니다
