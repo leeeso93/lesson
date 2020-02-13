@@ -238,13 +238,12 @@
       let searchValue = event.target.value;
 
       const searchList = timelineList.filter(item => {
-        item.text.indexOf(searchValue) !== -1 &&
+        return item.text.indexOf(searchValue) !== -1 &&
           item.name.indexOf(searchValue) !== -1;
       });
-
-      console.log(searchList);
-      //XX 여기서 list 뿌리는 방법을 모르겠음.... 자꾸 length error남 ..ㅠㅠ
-      divide(searchList, 3);
+      if(searchList.length > 0) {
+        divide(searchList, 3);
+      }
     };
 
     //sort
@@ -265,8 +264,6 @@
             (y.clipCount + y.commentCount * 2)
         );
       }
-      //XX 여기서 list 뿌리는 방법을 모르겠음.. 자꾸 length error남 ..ㅠㅠ
-      console.log(timelineList);
       divide(timelineList, 3);
     };
     create();
