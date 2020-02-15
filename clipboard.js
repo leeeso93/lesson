@@ -163,57 +163,10 @@
     let page = 1;
     const ITEM_PER_ROW = 3;
     const timelineList = await common.fetchApiData(url, page++);
-    let keyword = "";
 
     const create = () => {
       render();
       $el = $parent.lastElementChild;
-      addEvent();
-    };
-
-    // addEventListener 함수
-    const addEvent = () => {
-      $el.firstElementChild.lastElementChild
-        .querySelector("input")
-        .addEventListener("keyup", keyup);
-      $el.firstElementChild.addEventListener("click", click);
-    };
-
-    const keyup = function(e) {
-      keyword = this.value;
-      $el.lastElementChild.firstElementChild.innerHTML = "";
-      renderGridItem(divide(filter(timelineList), ITEM_PER_ROW)); // 리랜더링
-    };
-
-    const click = function(e) {
-      const kind = e.target.dataset.kind;
-      console.log(kind);
-
-      if (!kind) {
-        return;
-      }
-      $el.lastElementChild.firstElementChild.innerHTML = "";
-      renderGridItem(divide(sort(kind), ITEM_PER_ROW)); // 리랜더링
-    };
-
-    const filter = list => {
-      if (!keyword) {
-        return list;
-      }
-      return list.filter(i => (i.text + i.name).includes(keyword));
-    };
-
-    const comparator = {
-      popular: (a, b) =>
-        b.clipCount * 1 +
-        b.commentCount * 2 -
-        a.clipCount * 1 +
-        a.commentCount * 2,
-      lastest: (a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp)
-    };
-    const sort = kind => {
-      timelineList.sort(comparator[kind]);
-      return filter(timelineList);
     };
 
     const divide = (list, size) => {
@@ -225,16 +178,30 @@
         listList.push(copy.splice(0, size));
       }
 
-      if (listList.length !== 0) {
-        const lastlist = listList[listList.length - 1];
-        for (let i = lastlist.length; i < size; i++) {
-          lastlist[i] = {};
-        }
+      const lastlist = listList[listList.length - 1];
+      for (let i = lastlist.length; i < size; i++) {
+        lastlist[i] = {};
       }
 
       return listList;
     };
     const listList = divide(timelineList, ITEM_PER_ROW);
+
+    const filter = () => {
+      // TODO 검색창 input에 key이벤트 발생시 검색로직 수행
+      $el.lastElementChild.firstElementChild.innerHTML = "";
+      divide(timelineList.filter(/* TODO */), ITEM_PER_ROW).forEach(list => {
+        /* TODO */
+      });
+    };
+
+    const sort = () => {
+      // TODO 최신순/인기순 클릭시 해당 정렬로직 수행
+      $el.lastElementChild.firstElementChild.innerHTML = "";
+      divide(timelineList.sort(/* TODO */), ITEM_PER_ROW).forEach(list => {
+        /* TODO */
+      });
+    };
 
     const render = () => {
       $parent.insertAdjacentHTML(
@@ -242,8 +209,8 @@
         `
               <article class="FyNDV">
                   <div class="Igw0E rBNOH YBx95 ybXk5 _4EzTm soMvl JI_ht bkEs3 DhRcB">
-                      <button data-kind="lastest" class="sqdOP L3NKy y3zKF JI_ht" type="button">최신순</button>
-                      <button data-kind="popular" class="sqdOP L3NKy y3zKF JI_ht" type="button">인기순</button>
+                      <button class="sqdOP L3NKy y3zKF JI_ht" type="button">최신순</button>
+                      <button class="sqdOP L3NKy y3zKF JI_ht" type="button">인기순</button>
                       <h1 class="K3Sf1">
                           <div class="Igw0E rBNOH eGOV_ ybXk5 _4EzTm">
                               <div class="Igw0E IwRSH eGOV_ vwCYk">
@@ -278,49 +245,46 @@
     return { $el, listList };
   })(timelineContent.$el.firstElementChild, timeline.url);
 
-  const renderGridItem = list => {
-    list.forEach(list => {
-      const gridItem = (($parent, list) => {
-        let $el;
+  grid.listList.forEach(list => {
+    const gridItem = (($parent, list) => {
+      let $el;
 
-        const create = () => {
-          render(list);
-          $el = $parent.lastElementChild;
-        };
+      const create = () => {
+        render(list);
+        $el = $parent.lastElementChild;
+      };
 
-        const render = list => {
-          const html = list.reduce((html, data) => {
-            const img =
-              (data.img || "") &&
-              `
-                          <a href="javascript:;">
-                              <div class="eLAPa">
-                                  <div class="KL4Bh">
-                                      <img class="FFVAD" decoding="auto" src="${common.IMG_PATH}${data.img}" style="object-fit: cover;">
-                                  </div>
-                              </div>
-                          </a>
-                      `;
-            html += `
-                          <div class="v1Nh3 kIKUG _bz0w">${img}</div>
-                      `;
-            return html;
-          }, "");
-
-          $parent.insertAdjacentHTML(
-            "beforeend",
+      const render = list => {
+        const html = list.reduce((html, data) => {
+          const img =
+            (data.img || "") &&
             `
-                      <div class="Nnq7C weEfm">
-                          ${html}
-                      </div>
-                  `
-          );
-        };
+                      <a href="javascript:;">
+                          <div class="eLAPa">
+                              <div class="KL4Bh">
+                                  <img class="FFVAD" decoding="auto" src="${common.IMG_PATH}${data.img}" style="object-fit: cover;">
+                              </div>
+                          </div>
+                      </a>
+                  `;
+          html += `
+                      <div class="v1Nh3 kIKUG _bz0w">${img}</div>
+                  `;
+          return html;
+        }, "");
 
-        create();
-        return { $el };
-      })(grid.$el.lastElementChild.firstElementChild, list);
-    });
-  };
-  renderGridItem(grid.listList);
+        $parent.insertAdjacentHTML(
+          "beforeend",
+          `
+                  <div class="Nnq7C weEfm">
+                      ${html}
+                  </div>
+              `
+        );
+      };
+
+      create();
+      return { $el };
+    })(grid.$el.lastElementChild.firstElementChild, list);
+  });
 })();
