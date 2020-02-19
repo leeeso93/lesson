@@ -3,65 +3,72 @@
  * All rights reserved. 무단전재 및 재배포 금지.
  * All contents cannot be copied without permission.
  */
-const common = (() => {
-    const IMG_PATH = 'https://it-crafts.github.io/lesson/img';
-    const fetchApiData = async (url, page = 'info') => {
-        const res = await fetch(url + page);
-        const data = await res.json();
-        return data.data;
-    }
 
-    return { IMG_PATH, fetchApiData }
+// 보이면 src를 data-src로 갈아 끼우면 된다.
+const common = (() => {
+  const IMG_PATH = "https://leeeso93.github.io/lesson/img";
+  const fetchApiData = async (url, page = "info") => {
+    const res = await fetch(url + page);
+    const data = await res.json();
+    return data.data;
+  };
+
+  return { IMG_PATH, fetchApiData };
 })();
 
-const Root = (selector) => {
-    let $el;
-    let $page;
+// 부모 컴포넌트가 자식 컴포넌트를 직접 들고 있는 형태
+const Root = selector => {
+  let $el; // 자기 자신
+  let $page; // 자식 컴포넌트
 
-    const create = () => {
-        $el = document.querySelector(selector);
-        $page = Timeline($el);
-        $page.create();
-    }
+  const create = () => {
+    // 자식 컴포넌트 생성
+    $el = document.querySelector(selector); // 자기 자신이 뭔지 찾고
+    $page = Timeline($el); //자식이 뭔지 찾고
+    $page.create(); // 자식을 그린다.
+  };
 
-    const destroy = () => {
-        $page && $page.destroy();
-    }
+  const destroy = () => {
+    $page && $page.destroy();
+  };
 
-    return { $el, create, destroy }
+  return { $el, create, destroy }; // 나 자신과, create, destory를 리턴
 };
 
-const Timeline = ($parent) => {
-    const URL = 'https://my-json-server.typicode.com/it-crafts/lesson/timeline/';
-    let $el;
-    let $profile;
-    let $content;
+const Timeline = $parent => {
+  const URL = "https://my-json-server.typicode.com/leeeso93/lesson/timeline/"; // json데이터
+  let $el; // 자기 자신
+  let $profile; // 자식
+  let $content; // 자식
 
-    const create = async () => {
-        render();
-        $el = $parent.firstElementChild;
-        const [ totalPage, profileData ] = await fetch();
-        $profile = TimelineProfile($el, profileData);
-        $profile.create();
-        $content = TimelineContent($el, URL, profileData, totalPage);
-        $content.create();
-    }
+  const create = async () => {
+    // 그린다.
+    render(); // html 임
+    $el = $parent.firstElementChild;
+    const [totalPage, profileData] = await fetch();
+    $profile = TimelineProfile($el, profileData); //실행 주제 이동
+    $profile.create();
+    $content = TimelineContent($el, URL, profileData, totalPage);
+    $content.create();
+  };
 
-    const destroy = () => {
-        $profile && $profile.destroy();
-        $content && $content.destroy();
-        $parent.removeChild($el);
-    }
+  const destroy = () => {
+    // 자식 컴포넌트가 존재하면 destory
+    $profile && $profile.destroy();
+    $content && $content.destroy();
+    // 자기자신(부모) 제거
+    $parent.removeChild($el);
+  };
 
-    const fetch = async () => {
-        const infoData = await common.fetchApiData(URL);
-        const totalPage = infoData.totalPage * 1;
-        const profileData = infoData.profile;
-        return [ totalPage, profileData ];
-    }
+  const fetch = async () => {
+    const infoData = await common.fetchApiData(URL);
+    const totalPage = infoData.totalPage * 1;
+    const profileData = infoData.profile;
+    return [totalPage, profileData];
+  };
 
-    const render = () => {
-        $parent.innerHTML = `
+  const render = () => {
+    $parent.innerHTML = `
             <div class="v9tJq">
                 <div class="fx7hk">
                     <a class="_9VEo1 T-jvg" href="javascript:;" data-type="grid"><span aria-label="게시물" class="glyphsSpritePhoto_grid__outline__24__grey_5 u-__7"></span></a>
@@ -70,47 +77,55 @@ const Timeline = ($parent) => {
                 </div>
             </div>
         `;
-    }
+  };
 
-    return { $el, create, destroy }
+  return { $el, create, destroy };
 };
 
 const TimelineProfile = ($parent, profileData = {}) => {
-    let $el;
+  let $el; // 자기자신
 
-    const create = () => {
-        render(profileData);
-        $el = $parent.firstElementChild;
+  const create = () => {
+    render(profileData);
+    $el = $parent.firstElementChild;
+  };
+
+  const destroy = () => {
+    $parent.removeChild($el);
+  };
+
+  const scaleDown = numstring => {
+    const num = numstring.replace(/,/g, "");
+    if (num >= 1000000) {
+      return Math.floor(num / 100000) / 10 + "백만";
     }
-
-    const destroy = () => {
-        $parent.removeChild($el);
+    if (num >= 1000) {
+      return Math.floor(num / 100) / 10 + "천";
     }
+    return num;
+  };
 
-    const scaleDown = numstring => {
-        const num = numstring.replace(/,/g, '');
-        if(num >= 1000000) {
-            return Math.floor(num / 100000) / 10 + '백만'
-        }
-        if(num >= 1000) {
-            return Math.floor(num / 100) / 10 + '천'
-        }
-        return num;
-    };
-
-    const render = (data) => {
-        $parent.insertAdjacentHTML('afterbegin', `
+  const render = data => {
+    $parent.insertAdjacentHTML(
+      "afterbegin",
+      `
             <div>
                 <header class="HVbuG">
                     <div class="XjzKX">
                         <div class="RR-M- h5uC0" role="button" tabindex="0">
                             <canvas class="CfWVH" height="91" width="91" style="position: absolute; top: -7px; left: -7px; width: 91px; height: 91px;"></canvas>
-                            <span class="_2dbep" role="link" tabindex="0" style="width: 77px; height: 77px;"><img alt="${data.name}님의 프로필 사진" class="_6q-tv" src="${common.IMG_PATH}${data.img}"></span>
+                            <span class="_2dbep" role="link" tabindex="0" style="width: 77px; height: 77px;"><img alt="${
+                              data.name
+                            }님의 프로필 사진" class="_6q-tv" src="${
+        common.IMG_PATH
+      }${data.img}"></span>
                         </div>
                     </div>
                     <section class="zwlfE">
                         <div class="nZSzR">
-                            <h1 class="_7UhW9 fKFbl yUEEX KV-D4 fDxYl">${data.name}</h1>
+                            <h1 class="_7UhW9 fKFbl yUEEX KV-D4 fDxYl">${
+                              data.name
+                            }</h1>
                             <span class="mrEK_ Szr5J coreSpriteVerifiedBadge" title="인증됨">인증됨</span>
                             <div class="AFWDX"><button class="dCJp8 afkep"><span aria-label="옵션" class="glyphsSpriteMore_horizontal__outline__24__grey_9 u-__7"></span></button></div>
                         </div>
@@ -125,69 +140,100 @@ const TimelineProfile = ($parent, profileData = {}) => {
                     </section>
                 </header>
                 <div class="-vDIg">
-                    <h1 class="rhpdm">${data.title}</h1><br><span>${data.text}</span>
+                    <h1 class="rhpdm">${data.title}</h1><br><span>${
+        data.text
+      }</span>
                 </div>
                 <ul class="_3dEHb">
-                    <li class="LH36I"><span class="_81NM2">게시물 <span class="g47SY lOXF2">${data.post}</span></span></li>
-                    <li class="LH36I"><a class="_81NM2" href="javascript:;">팔로워 <span class="g47SY lOXF2" title="${data.follower}">${scaleDown(data.follower)}</span></a></li>
-                    <li class="LH36I"><a class="_81NM2" href="javascript:;">팔로우 <span class="g47SY lOXF2">${data.follow}</span></a></li>
+                    <li class="LH36I"><span class="_81NM2">게시물 <span class="g47SY lOXF2">${
+                      data.post
+                    }</span></span></li>
+                    <li class="LH36I"><a class="_81NM2" href="javascript:;">팔로워 <span class="g47SY lOXF2" title="${
+                      data.follower
+                    }">${scaleDown(data.follower)}</span></a></li>
+                    <li class="LH36I"><a class="_81NM2" href="javascript:;">팔로우 <span class="g47SY lOXF2">${
+                      data.follow
+                    }</span></a></li>
                 </ul>
             </div>
-        `);
-    }
+        `
+    );
+  };
 
-    return { $el, create, destroy }
+  return { $el, create, destroy };
 };
 
-const TimelineContent = ($parent, url = '', profileData = {}, totalPage = 1) => {
-    let $el;
-    let $feed;
+const TimelineContent = (
+  $parent,
+  url = "",
+  profileData = {},
+  totalPage = 1
+) => {
+  let $el;
+  let $feed;
 
-    let page = 0;
-    const dataList = [];
+  let page = 0; // 현재 페이지를 바라보게끔 리팩토링(current page)
+  const dataList = [];
 
-    const create = async () => {
-        render();
-        $el = $parent.lastElementChild;
-        const pageDataList = await fetch();
-        $feed = Feed($el.firstElementChild, profileData, pageDataList);
-        $feed.create();
-        initInfiniteScroll();
-    }
+  const create = async () => {
+    render();
+    $el = $parent.lastElementChild;
+    const pageDataList = await fetch();
+    $feed = Feed($el.firstElementChild, profileData, pageDataList);
+    $feed.create();
+    initInfiniteScroll();
+  };
 
-    const destroy = () => {
-        $feed && $feed.destroy();
-        $parent.removeChild($el);
-    }
+  const destroy = () => {
+    $feed && $feed.destroy();
+    $parent.removeChild($el);
+  };
 
-    const fetch = async () => {
-        const pageDataList = await common.fetchApiData(url, ++page);
-        dataList.push(pageDataList);
-        return pageDataList;
-    }
+  const fetch = async () => {
+    const pageDataList = await common.fetchApiData(url, ++page);
+    dataList.push(pageDataList);
+    return pageDataList;
+  };
 
-    const initInfiniteScroll = () => {
-        const $loading = $el.lastElementChild;
-        const io = new IntersectionObserver((entryList, observer) => {
-            entryList.forEach(async entry => {
-                if(!entry.isIntersecting) { return; }
-                await ajaxMore();
-                if(page >= totalPage) {
-                    observer.unobserve(entry.target);
-                    $loading.style.display = 'none';
-                }
-            }); // rootMargin 미동작 (인스타그램에서 자체적으로 막아놓은 것 같기도 함)
-        });
-        io.observe($loading);
-    }
+  // 무한 스크롤 구현
+  const initInfiniteScroll = () => {
+    // 자동 더보기로직 구현
+    const $loading = $el.lastElementChild; //로딩이미지
+    const io = new IntersectionObserver(
+      (entryList, observer) => {
+        // 가시성 관련 최신 메소드
+        entryList.forEach(async entry => {
+          // entry  :  가시성이 있는거
 
-    const ajaxMore = async () => {
-        const pageDataList = await fetch();
-        $feed && $feed.addFeedItems(profileData, pageDataList);
-    }
+          if (!entry.isIntersecting) {
+            // 나갔을때 강제 리턴
+            return;
+          }
 
-    const render = () => {
-        $parent.insertAdjacentHTML('beforeend', `
+          await ajaxMore(); //들어왔을때 (다음 엘리먼트가 보이는 시점)에 호출
+
+          if (page >= totalPage) {
+            // 끝난시점에
+            observer.unobserve(entry.target); // 바라보기 종료
+            $loading.style.display = "none"; // 마지막에만 로딩이미지가 숨겨지도록
+          }
+        }); // rootMargin 미동작 (인스타그램에서 자체적으로 막아놓은 것 같기도 함)
+      },
+      { rootMargin: innerHeight + "px" }
+    );
+
+    io.observe($loading); // 이 api가 로딩이미지 element를 바라보고 있다.
+    // 이 로딩이미지가 화면 밖으로 빠져나왔을떄 , 바라보기 종료
+  };
+
+  const ajaxMore = async () => {
+    const pageDataList = await fetch();
+    $feed && $feed.addFeedItems(profileData, pageDataList); // 자식 컴포넌트 에 프로필 데이터와 다음에 추가될 데이터를 추가한다.
+  };
+  const render = () => {
+    $parent.insertAdjacentHTML(
+      "beforeend",
+      `
             <div class="_2z6nI">
                 <div style="flex-direction: column;">
                 </div>
@@ -195,33 +241,54 @@ const TimelineContent = ($parent, url = '', profileData = {}, totalPage = 1) => 
                     <div class="Igw0E IwRSH YBx95 _4EzTm _9qQ0O ZUqME" style="height: 32px; width: 32px;"><svg aria-label="읽어들이는 중..." class="By4nA" viewBox="0 0 100 100"><rect fill="#555555" height="6" opacity="0" rx="3" ry="3" transform="rotate(-90 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.08333333333333333" rx="3" ry="3" transform="rotate(-60 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.16666666666666666" rx="3" ry="3" transform="rotate(-30 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.25" rx="3" ry="3" transform="rotate(0 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.3333333333333333" rx="3" ry="3" transform="rotate(30 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.4166666666666667" rx="3" ry="3" transform="rotate(60 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.5" rx="3" ry="3" transform="rotate(90 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.5833333333333334" rx="3" ry="3" transform="rotate(120 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.6666666666666666" rx="3" ry="3" transform="rotate(150 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.75" rx="3" ry="3" transform="rotate(180 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.8333333333333334" rx="3" ry="3" transform="rotate(210 50 50)" width="25" x="72" y="47"></rect><rect fill="#555555" height="6" opacity="0.9166666666666666" rx="3" ry="3" transform="rotate(240 50 50)" width="25" x="72" y="47"></rect></svg></div>
                 </div>
             </div>
-        `);
-    }
+        `
+    );
+  };
 
-    return { $el, create, destroy }
+  return { $el, create, destroy };
 };
 
 // TODO 뷰 역할인 Feed 컴포넌트에 이미지 레이지로드 기능 추가 - initInfiniteScroll 히스토리 참고
 const Feed = ($parent, profileData = {}, pageDataList = []) => {
-    const $elList = [];
+  const $elList = [];
 
-    const create = () => {
-        addFeedItems(profileData, pageDataList);
-    }
+  const create = () => {
+    addFeedItems(profileData, pageDataList);
+  };
 
-    const destroy = () => {
-        $elList.forEach($el => $parent.removeChild($el));
-    }
+  const destroy = () => {
+    $elList.forEach($el => $parent.removeChild($el));
+  };
 
-    const addFeedItems = (profileData = {}, pageDataList = []) => {
-        const firstIndex = $parent.children.length;
-        render(profileData, pageDataList);
-        $elList.push(...[].slice.call($parent.children, firstIndex));
-    }
+  const addFeedItems = (profileData = {}, pageDataList = []) => {
+    const firstIndex = $parent.children.length; // 부모의자식의 크기가 첫번째 인덱스 lastindex = length -1
+    render(profileData, pageDataList); // 그린다.
+    $elList.push(...[].slice.call($parent.children, firstIndex)); // 부모의 자식의 엘리먼트들의 첫번째부터 끝까지 얕은 복사한다음에 푸시
+    lazyLoad();
+  };
 
-    const render = (profileData, pageDataList) => {
-        const html = pageDataList.reduce((html, data) => {
-            html += `
+  const lazyLoad = () => {
+    const io = new IntersectionObserver((entryList, observer) => {
+      entryList.forEach(async entry => {
+        if (!entry.isIntersecting) {
+          return;
+        } else {
+          const lazyLoadImgs = entry.target.querySelector(".FFVAD");
+          // data-src로 교체
+          lazyLoadImgs.src = lazyLoadImgs.dataset.src;
+        }
+      });
+    });
+
+    console.log($elList);
+    $elList.forEach($el => {
+      io.observe($el); //
+    });
+  };
+
+  const render = (profileData, pageDataList) => {
+    const html = pageDataList.reduce((html, data) => {
+      html += `
                 <article id="feed" class="M9sTE h0YNM SgTZ1">
                     <header class="Ppjfr UE9AK wdOqh">
                         <div class="RR-M- h5uC0 mrq0Z" role="button" tabindex="0">
@@ -282,15 +349,16 @@ const Feed = ($parent, profileData = {}, pageDataList = []) => {
                     </div>
                 </article>
             `;
-            return html;
-        }, '');
-        $parent.insertAdjacentHTML('beforeend', html);
-    }
+      return html;
+    }, "");
+    $parent.insertAdjacentHTML("beforeend", html);
+  };
 
-    return { $elList, create, destroy, addFeedItems }
+  return { $elList, create, destroy, addFeedItems }; // 부모에서 호출하기 위해서 api로 열어준다
+  // 부모에서 호출하는 이러한 형태는 후반에서는 끊어줄 예정이다.
 };
 
-const root = Root('main');
+const root = Root("main");
 root.create();
 // root.destroy();
 // root.create();
