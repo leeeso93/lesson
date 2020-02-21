@@ -217,7 +217,7 @@ const TimelineContent = (
             observer.unobserve(entry.target); // 바라보기 종료
             $loading.style.display = "none"; // 마지막에만 로딩이미지가 숨겨지도록
           }
-        }); // rootMargin 미동작 (인스타그램에서 자체적으로 막아놓은 것 같기도 함)
+        });
       },
       { rootMargin: innerHeight + "px" }
     );
@@ -268,18 +268,43 @@ const Feed = ($parent, profileData = {}, pageDataList = []) => {
   };
 
   const lazyLoad = () => {
+    /* TODO 현재는 페이지수 만큼 io객체가 생성되고 있습니다, 만약 10페이지, 100페이지, ... 가 있다면 그 만큼 생성됩니다
+    로직상 Feed는 List를 담는 컴포넌트이기 때문에, 사실 io는 하나만 있으면 충분합니다
+    io 생성은 컴포넌트 레벨로 올리고, observe하는 로직만 반복되면 성능이 개선될 수 있을 것 같습니다 */
     const io = new IntersectionObserver((entryList, observer) => {
       entryList.forEach(async entry => {
         if (!entry.isIntersecting) {
           return;
+        /* TODO 분기가 필요한 케이스라면 두 가지 패턴을 기준으로 생각하세요
+        1) 특정한 상태를 감시하고 있다가 로직을 return으로 튕겨내는 예외로직
+        2) 특정한 상태에만 수행되는 예외로직 (빼도 위아래 로직에 영향이 없는)
+        위아래 로직과 결합이 있다면 그건 예외로직이 아니라 메인로직 입니다
+        또는 함수형으로 사고한다면 위의 1)과 2)를 아예 반대로 짤 수도 있습니다
+        현재는 위의 if문이 예외로직이기 때문에, 아래 else문은 제거 대상입니다 */
         } else {
+          /* FIXME 일단 여기서는 FFVAD 클래스가 내부적으로 이미지를 뜻하는 게 아니어서 바람직하지 못합니다
+          해당 클래스가 이미지가 맞더라도, 추후 확장시 다른 엘리먼트에 해당 클래스가 사용되면 버그가 발생합니다
+          또는 해당 클래스의 이름이 변경될 경우에도 의도치 않은 동작이 발생합니다 (이 때는 장애)
+          스타일을 위해 사용한 마크업 상의 클래스는 컴포넌트 로직에서는 되도록 사용을 지양해주세요
+          마크업의 클래스와 컴포넌트의 로직이 의미상으로 1:1로 일치되는 경우는 거의 없습니다
+          거의 대부분 우연히 그 시점에만 때려맞았을 뿐이고, 잠재적인 버그를 갖고 있습니다
+          (참고로 NHN에서는, 꼭 필요할 경우 js-classname 같은 클래스를 직접 추가해서 쓰는 걸 권장합니다)
+          만약 제가 했다면 img[data-src] 정도로 썼을 것 같은데, 여기부터는 취향이라 참고만 해주세요 */
           const lazyLoadImgs = entry.target.querySelector(".FFVAD");
           // data-src로 교체
           lazyLoadImgs.src = lazyLoadImgs.dataset.src;
+          delete lazyLoadImgs.dataset.src;
+          // TODO 해당로직은 레이지"로드" 이기 때문에, 할 일 끝낸 엘리먼트는 가시성체크 종료가 필요합니다
+          observer.unobserve(entry.target);
         }
       });
     });
 
+    /* BUG 매 번 전체 $elList 대상의 이미지 엘리먼트를 긁고 있기 때문에,
+    2페이지, 3페이지, ... addFeedItems 호출 시에 이전페이지 이미지들이 다시 옵저버에 등록됩니다
+    겸사겸사 delete lazyLoadImgs.dataset.src; 추가했으니, 내렸다가 다시 올려보세요
+    해법은 추가한 엘리먼트 대상으로 룩업을 하는 방법이 있을 것 같고 (push 하기 전에 미리 뽑아두고?)
+    아니면 data-src 속성을 기준으로 뽑을 수도 있을 것 같습니다 */
     console.log($elList);
     $elList.forEach($el => {
       io.observe($el); //
