@@ -275,7 +275,11 @@ const Feed = ($parent, profileData = {}, pageDataList = []) => {
       entryList.forEach(async entry => {
         if (!entry.isIntersecting) {
           return;
+<<<<<<< HEAD
           /* TODO 분기가 필요한 케이스라면 두 가지 패턴을 기준으로 생각하세요
+=======
+        /* TODO 분기가 필요한 케이스라면 두 가지 패턴을 기준으로 생각하세요
+>>>>>>> 5d01322b5a197738c9b64d9ab4823672740b2d54
         1) 특정한 상태를 감시하고 있다가 로직을 return으로 튕겨내는 예외로직
         2) 특정한 상태에만 수행되는 예외로직 (빼도 위아래 로직에 영향이 없는)
         위아래 로직과 결합이 있다면 그건 예외로직이 아니라 메인로직 입니다
